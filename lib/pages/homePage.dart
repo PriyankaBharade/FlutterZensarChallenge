@@ -1,63 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:json_parsing_demo/provider/myHomePageProvider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'PlayerSearch.dart';
+import 'package:json_parsing_demo/model/userInfo.dart';
 class MyHomePage extends StatelessWidget {
+SearchBar searchBar;
+userInfo  userinfo;
+AppBar buildAppBar(BuildContext context) {
+    return new AppBar(
+      title: new Text('User Details'),
+      actions: [searchBar.getSearchAction(context)]
+    );
+  }  
+MyHomePage(){
+   searchBar = new SearchBar(
+      inBar: false,
+      onSubmitted: print,
+      buildDefaultAppBar: buildAppBar
+    );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+               showSearch(
+                   context: context, delegate: PlayerSearch(userinfo.userlist));
+                   
+            },
+            icon: Icon(Icons.search),
+          )
+        ],
         centerTitle: true,
-        title: Text('Json Parsing Demo'),
+        title: Text('User info'),
       ),
       body: ChangeNotifierProvider<MyHomePageProvider>(
         create: (context) => MyHomePageProvider(),
         child: Consumer<MyHomePageProvider>(
           builder: (context, provider, child) {
-            if (provider.data == null) {
+            if (provider.userinfo == null) {
               provider.getData(context);
               return Center(child: CircularProgressIndicator());
             }
+             this.userinfo = provider.userinfo;
             // when we have the json loaded... let's put the data into a data table widget
             return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+             // scrollDirection: Axis.horizontal,
               // Data table widget in not scrollable so we have to wrap it in a scroll view when we have a large data set..
               child: SingleChildScrollView(
                 child: DataTable(
                   columns: [
                     DataColumn(
-                        label: Text('Verified'),
-                        tooltip: 'represents if user is verified.'),
+                        label: Text('id'),
+                        tooltip: 'represents phone number of the user'),
                     DataColumn(
-                        label: Text('First Name'),
+                        label: Text('Name'),
                         tooltip: 'represents first name of the user'),
                     DataColumn(
-                        label: Text('Last Name'),
+                        label: Text('Email'),
                         tooltip: 'represents last name of the user'),
                     DataColumn(
-                        label: Text('Email'),
+                        label: Text('Role'),
                         tooltip: 'represents email address of the user'),
                     DataColumn(
-                        label: Text('Phone'),
-                        tooltip: 'represents phone number of the user'),
+                        label: Text('Delete'),
+                        tooltip: 'represents if user is verified.'),
+                    DataColumn(
+                        label: Text('Edit'),
+                        tooltip: 'represents if user is verified.'),
                   ],
-                  rows: provider.data.results
-                      .map((data) =>
+                  rows: provider.userinfo.userlist
+                      .map((userinfo) =>
                           // we return a DataRow every time
+                           //this.userinfo = provider.userinfo;
                           DataRow(
                               // List<DataCell> cells is required in every row
                               cells: [
-                                DataCell((data.verified)
-                                    ? Icon(
-                                        Icons.verified_user,
-                                        color: Colors.green,
-                                      )
-                                    : Icon(Icons.cancel, color: Colors.red)),
-                                // I want to display a green color icon when user is verified and red when unverified
-                                DataCell(Text(data.firstName)),
-                                DataCell(Text(data.lastName)),
-                                DataCell(Text(data.email)),
-                                DataCell(Text(data.phone)),
+                                DataCell(Text(userinfo.id)),
+                                DataCell(Text(userinfo.name)),
+                                DataCell(Text(userinfo.email)),
+                                DataCell(Text(userinfo.role)),
+                                DataCell(Icon(Icons.delete,color:Colors.black),
+                                onTap: () {
+                                 provider.deleteItem(userinfo.id);
+                                }),
+                                DataCell(Icon(Icons.edit,color:Colors.black)),
                               ]))
                       .toList(),
                 ),
