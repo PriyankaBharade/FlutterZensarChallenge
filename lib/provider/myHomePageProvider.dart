@@ -18,12 +18,12 @@ class MyHomePageProvider extends ChangeNotifier {
      this.notifyListeners(); 
   } else {
     throw Exception('Unexpected error occured!');
-  }
+   }
   }
 
   deleteItem(id){
-     print('Print User Id is- ${id}');
-    userinfo.userlist.remove(0);
-    notifyListeners();
+    userinfo.userlist.removeWhere( (item) => item.id == id );
+   // this.userinfo = userinfo;
+    this.notifyListeners();
   }
 }

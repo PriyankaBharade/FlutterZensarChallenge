@@ -5,9 +5,16 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'PlayerSearch.dart';
 import 'package:json_parsing_demo/model/userInfo.dart';
-class MyHomePage extends StatelessWidget {
-SearchBar searchBar;
+
+class MyHomePage extends StatefulWidget {
+ @override 
+ _MyHomePage createState() => _MyHomePage();
+}
+
+class _MyHomePage extends State<MyHomePage>{
+  SearchBar searchBar;
 userInfo  userinfo;
+int _rowPerPage = PaginatedDataTable.defaultRowsPerPage;
 AppBar buildAppBar(BuildContext context) {
     return new AppBar(
       title: new Text('User Details'),
@@ -23,6 +30,7 @@ MyHomePage(){
 }
   @override
   Widget build(BuildContext context) {
+     var screenSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -38,7 +46,9 @@ MyHomePage(){
         centerTitle: true,
         title: Text('User info'),
       ),
-      body: ChangeNotifierProvider<MyHomePageProvider>(
+      body: Container(
+        width: screenSize.width,
+        child : ChangeNotifierProvider<MyHomePageProvider>(
         create: (context) => MyHomePageProvider(),
         child: Consumer<MyHomePageProvider>(
           builder: (context, provider, child) {
@@ -46,14 +56,16 @@ MyHomePage(){
               provider.getData(context);
               return Center(child: CircularProgressIndicator());
             }
-             this.userinfo = provider.userinfo;
+            this.userinfo = provider.userinfo;
+            var dts = DTS(userinfo,provider);
             // when we have the json loaded... let's put the data into a data table widget
             return SingleChildScrollView(
-             // scrollDirection: Axis.horizontal,
-              // Data table widget in not scrollable so we have to wrap it in a scroll view when we have a large data set..
+              //scrollDirection: Axis.horizontal,
+              // Data table widget in not scrollable so we have to wrap it in a scroll view when we have a large data set..      
               child: SingleChildScrollView(
-                child: DataTable(
-                  columns: [
+                 child : PaginatedDataTable(
+                 //  child: DataTable(
+                     columns: [
                     DataColumn(
                         label: Text('id'),
                         tooltip: 'represents phone number of the user'),
@@ -73,30 +85,48 @@ MyHomePage(){
                         label: Text('Edit'),
                         tooltip: 'represents if user is verified.'),
                   ],
-                  rows: provider.userinfo.userlist
-                      .map((userinfo) =>
-                          // we return a DataRow every time
-                           //this.userinfo = provider.userinfo;
-                          DataRow(
-                              // List<DataCell> cells is required in every row
-                              cells: [
-                                DataCell(Text(userinfo.id)),
-                                DataCell(Text(userinfo.name)),
-                                DataCell(Text(userinfo.email)),
-                                DataCell(Text(userinfo.role)),
-                                DataCell(Icon(Icons.delete,color:Colors.black),
-                                onTap: () {
-                                 provider.deleteItem(userinfo.id);
-                                }),
-                                DataCell(Icon(Icons.edit,color:Colors.black)),
-                              ]))
-                      .toList(),
-                ),
+                  source: dts,
+                 onRowsPerPageChanged: (r){
+                        setState((){
+                            _rowPerPage = r;
+                        });
+                    },
+                    rowsPerPage:_rowPerPage,
               ),
+             ),
+              
             );
           },
         ),
       ),
+      ),
     );
   }
+}
+
+
+class DTS extends DataTableSource {
+  userInfo  userinfo;
+  MyHomePageProvider provider;
+  DTS(this.userinfo, this.provider);
+  @override
+  DataRow getRow(int index){
+    return DataRow.byIndex(index: index,  cells: [
+                                DataCell(Text(userinfo.userlist[index].id)),
+                                DataCell(Text(userinfo.userlist[index].name)),
+                                DataCell(Text(userinfo.userlist[index].email)),
+                                DataCell(Text(userinfo.userlist[index].role)),
+                                DataCell(Icon(Icons.delete,color:Colors.black),
+                                onTap: () {
+                                 provider.deleteItem(userinfo.userlist[index].id);
+                                }),
+                                DataCell(Icon(Icons.edit,color:Colors.black)),
+                              ]);
+  }
+  @override
+  bool get isRowCountApproximate => true;
+  @override
+  int get rowCount => userinfo.userlist.length;
+  @override
+  int get selectedRowCount => 0;
 }
