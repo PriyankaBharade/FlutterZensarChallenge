@@ -10,7 +10,12 @@ class userInfo {
    }
   }
 
+  // userInfo.setData(userDetails userdetail){
+  // userlist.set(userdetail);
+  // }
 }
+
+
 
 // class userDetails{
 //   String id;

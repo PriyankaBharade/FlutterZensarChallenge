@@ -12,7 +12,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePage extends State<MyHomePage>{
-  SearchBar searchBar;
+SearchBar searchBar;
 userInfo  userinfo;
 int _rowPerPage = PaginatedDataTable.defaultRowsPerPage;
 AppBar buildAppBar(BuildContext context) {
@@ -57,14 +57,12 @@ MyHomePage(){
               return Center(child: CircularProgressIndicator());
             }
             this.userinfo = provider.userinfo;
-            var dts = DTS(userinfo,provider);
+            var dts = DTS(userinfo,provider,context);
             // when we have the json loaded... let's put the data into a data table widget
             return SingleChildScrollView(
-              //scrollDirection: Axis.horizontal,
               // Data table widget in not scrollable so we have to wrap it in a scroll view when we have a large data set..      
               child: SingleChildScrollView(
                  child : PaginatedDataTable(
-                 //  child: DataTable(
                      columns: [
                     DataColumn(
                         label: Text('id'),
@@ -73,17 +71,21 @@ MyHomePage(){
                         label: Text('Name'),
                         tooltip: 'represents first name of the user'),
                     DataColumn(
+                        label: Text('Edit Name'),
+                        tooltip: 'represents if user is verified.'),
+                    DataColumn(
                         label: Text('Email'),
                         tooltip: 'represents last name of the user'),
+                     DataColumn(
+                        label: Text('Edit Email'),
+                        tooltip: 'represents if user is verified.'),
                     DataColumn(
                         label: Text('Role'),
                         tooltip: 'represents email address of the user'),
                     DataColumn(
                         label: Text('Delete'),
                         tooltip: 'represents if user is verified.'),
-                    DataColumn(
-                        label: Text('Edit'),
-                        tooltip: 'represents if user is verified.'),
+                   
                   ],
                   source: dts,
                  onRowsPerPageChanged: (r){
@@ -94,7 +96,6 @@ MyHomePage(){
                     rowsPerPage:_rowPerPage,
               ),
              ),
-              
             );
           },
         ),
@@ -102,25 +103,34 @@ MyHomePage(){
       ),
     );
   }
+
 }
 
 
 class DTS extends DataTableSource {
   userInfo  userinfo;
   MyHomePageProvider provider;
-  DTS(this.userinfo, this.provider);
+  BuildContext context;
+  DTS(this.userinfo, this.provider,this.context);
   @override
   DataRow getRow(int index){
     return DataRow.byIndex(index: index,  cells: [
                                 DataCell(Text(userinfo.userlist[index].id)),
                                 DataCell(Text(userinfo.userlist[index].name)),
+                                DataCell(Icon(Icons.edit,color:Colors.black),
+                                onTap:(){
+                                  provider.editName(userinfo.userlist[index],context);
+                                 }),
                                 DataCell(Text(userinfo.userlist[index].email)),
+                                DataCell(Icon(Icons.edit,color:Colors.black),
+                                onTap:(){
+                                  provider.editEmail(userinfo.userlist[index],context);
+                                 }),
                                 DataCell(Text(userinfo.userlist[index].role)),
                                 DataCell(Icon(Icons.delete,color:Colors.black),
                                 onTap: () {
                                  provider.deleteItem(userinfo.userlist[index].id);
                                 }),
-                                DataCell(Icon(Icons.edit,color:Colors.black)),
                               ]);
   }
   @override
