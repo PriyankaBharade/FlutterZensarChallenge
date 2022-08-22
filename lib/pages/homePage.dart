@@ -89,6 +89,7 @@ MyHomePage(){
                   ],
                   source: dts,
                  onRowsPerPageChanged: (r){
+                  print("Page Changes ${r}");
                         setState((){
                             _rowPerPage = r;
                         });
@@ -99,7 +100,7 @@ MyHomePage(){
             );
           },
         ),
-      ),
+       ),
       ),
     );
   }
@@ -114,6 +115,7 @@ class DTS extends DataTableSource {
   DTS(this.userinfo, this.provider,this.context);
   @override
   DataRow getRow(int index){
+      print("index $index check");
     return DataRow.byIndex(index: index,  cells: [
                                 DataCell(Text(userinfo.userlist[index].id)),
                                 DataCell(Text(userinfo.userlist[index].name)),
@@ -134,7 +136,7 @@ class DTS extends DataTableSource {
                               ]);
   }
   @override
-  bool get isRowCountApproximate => true;
+  bool get isRowCountApproximate => false;
   @override
   int get rowCount => userinfo.userlist.length;
   @override
