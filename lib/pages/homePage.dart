@@ -7,7 +7,6 @@ import 'PlayerSearch.dart';
 import 'package:json_parsing_demo/model/userInfo.dart';
 
 class MyHomePage extends StatefulWidget {
-  var test = "Priyanka";
  @override 
  _MyHomePage createState() => _MyHomePage();
 }
